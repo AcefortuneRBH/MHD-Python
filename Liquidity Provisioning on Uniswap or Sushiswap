@@ -1,0 +1,29 @@
+const { ethers } = require("ethers");
+
+// Uniswap V2 factory contract address on Ethereum Mainnet
+const UNISWAP_FACTORY_ADDRESS = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
+
+// Minimal ABI for the factory
+const factoryABI = [
+  "function createPair(address tokenA, address tokenB) external returns (address pair)"
+];
+
+async function createPair() {
+  // Setup provider and signer
+  const provider = new ethers.providers.JsonRpcProvider(process.env.MAINNET_RPC_URL);
+  const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
+
+  // Instantiate the factory contract
+  const factory = new ethers.Contract(UNISWAP_FACTORY_ADDRESS, factoryABI, wallet);
+
+  // Set token addresses: MHDTOKEN and WETH (for example)
+  const tokenA = "0xYourMHDTOKENAddress"; // Replace with your token address
+  const tokenB = "0xC02aaa39b223FE8D0A0e5C4F27ead9083C756Cc2"; // WETH address
+
+  // Create the pair
+  const tx = await factory.createPair(tokenA, tokenB);
+  const receipt = await tx.wait();
+  console.log("Pair created:", receipt);
+}
+
+createPair().catch(console.error);
