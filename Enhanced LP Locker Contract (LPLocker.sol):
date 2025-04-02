@@ -1,0 +1,37 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+
+/// @title LPLocker
+/// @notice A secure contract to lock LP tokens until a specified unlock time.
+contract LPLocker is ReentrancyGuard {
+    using SafeERC20 for IERC20;
+
+    address public owner;
+    IERC20 public lpToken;
+    uint256 public unlockTime;
+
+    event Withdraw(address indexed owner, uint256 amount);
+
+    /// @notice Constructor sets the LP token and lock duration.
+    /// @param _lpToken The address of the LP token to lock.
+    /// @param _lockDuration Duration in seconds for which the tokens are locked.
+    constructor(address _lpToken, uint256 _lockDuration) {
+        owner = msg.sender;
+        lpToken = IERC20(_lpToken);
+        unlockTime = block.timestamp + _lockDuration;
+    }
+
+    /// @notice Withdraw LP tokens after the lock period.
+    function withdraw() external nonReentrant {
+        require(msg.sender == owner, "Not owner");
+        require(block.timestamp >= unlockTime, "Tokens are still locked");
+        uint256 balance = lpToken.balanceOf(address(this));
+        require(balance > 0, "No tokens to withdraw");
+        lpToken.safeTransfer(owner, balance);
+        emit Withdraw(owner, balance);
+    }
+}
