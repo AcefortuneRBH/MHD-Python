@@ -1,0 +1,15 @@
+// This sample script logs Transfer events from your MHDTOKEN contract
+const { ethers } = require("ethers");
+
+async function handler(event) {
+  // The event payload is provided by Defender
+  console.log("Event received:", event);
+
+  // Example: Filter for large transfers or suspicious activity
+  // const transferAmount = ethers.utils.formatEther(event.data.amount);
+  // if (parseFloat(transferAmount) > 1000000) { ... }
+
+  return "done";
+}
+
+module.exports = { handler };
